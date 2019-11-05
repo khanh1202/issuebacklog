@@ -18,7 +18,7 @@ export const RoutesManager: React.FC = () => (
   <BrowserRouter>
     <Switch>
       {routes.map(({ url, component }) => (
-        <Route exact path={url} component={component} />
+        <Route key={url} exact path={url} component={component} />
       ))}
     </Switch>
   </BrowserRouter>
