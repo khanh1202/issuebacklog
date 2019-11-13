@@ -5,18 +5,25 @@ import {
   TableBody,
   TableCell,
   TableHead,
-  TableRow
+  TableRow,
+  TableFooter,
+  TablePagination
 } from '@material-ui/core';
+import TablePaginationActions from 'components/Issues/TablePaginationActions';
 
 import { withRouter, RouteComponentProps } from 'react-router';
 
 interface IIssuesState {
   issues: IIssue[];
+  rowsPerPage: number;
+  currentPage: number;
 }
 
 export class Issues extends React.Component<RouteComponentProps, IIssuesState> {
   state: IIssuesState = {
-    issues: []
+    issues: [],
+    rowsPerPage: 3,
+    currentPage: 0
   };
 
   componentDidMount() {
@@ -31,8 +38,31 @@ export class Issues extends React.Component<RouteComponentProps, IIssuesState> {
     history.push(`/issues/${issue._id}`);
   };
 
+  handlePageChange = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    page: number
+  ) => {
+    this.setState({ currentPage: page });
+  };
+
+  handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    this.setState({
+      rowsPerPage: parseInt(event.target.value, 10),
+      currentPage: 0
+    });
+  };
+
   render() {
-    const { issues } = this.state;
+    const { issues, rowsPerPage, currentPage } = this.state;
+    const issuesToDisplay =
+      rowsPerPage > 0
+        ? issues.slice(
+            currentPage * rowsPerPage,
+            currentPage * rowsPerPage + rowsPerPage
+          )
+        : issues;
 
     return (
       <Table>
@@ -47,7 +77,7 @@ export class Issues extends React.Component<RouteComponentProps, IIssuesState> {
           </TableRow>
         </TableHead>
         <TableBody>
-          {issues.map(issue => (
+          {issuesToDisplay.map(issue => (
             <TableRow
               key={issue._id}
               onClick={this.createIssueClickHandler(issue)}
@@ -62,6 +92,19 @@ export class Issues extends React.Component<RouteComponentProps, IIssuesState> {
             </TableRow>
           ))}
         </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TablePagination
+              rowsPerPageOptions={[3, 6, 9]}
+              count={issues.length}
+              rowsPerPage={rowsPerPage}
+              page={currentPage}
+              onChangePage={this.handlePageChange}
+              onChangeRowsPerPage={this.handleChangeRowsPerPage}
+              ActionsComponent={TablePaginationActions}
+            ></TablePagination>
+          </TableRow>
+        </TableFooter>
       </Table>
     );
   }
